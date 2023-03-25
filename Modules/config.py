@@ -18,3 +18,6 @@ key_vert_space = 4
 
 # spacing between columns
 col_space = 5
+
+# key stagger, positive-y [col0, col1, col2...]
+key_stagger = [0, 3, 8, 6, 6]

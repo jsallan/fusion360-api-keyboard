@@ -15,13 +15,28 @@ class Component:
 
 
 class Box:
-    def __init__(self, parent_comp, height, width, depth, name, sketch_plane="xy"):
+    def __init__(self, parent_comp, height, width, depth, name, sketch_plane="xy", x_center=0, y_center=0, z_center=0):
         self.parent_comp = parent_comp
         self.sketch_plane = self.get_sketch_plane(sketch_plane)
         self.height = height * mm
         self.width = width * mm
         self.depth = depth * mm
         self.name = name
+        self.x_center = x_center * mm
+        self.y_center = y_center * mm
+        self.z_center = z_center * mm
+        self.corners = self.create_corners()
+        self.sketch = None
+        self.body = None
+        self.extruded_feature = None
+
+    def create_corners(self):
+        # (x, y, z)
+        self.tl = {"x" : -(self.width/2) + self.x_center, "y" : (self.height/2) + self.y_center, "z" : self.z_center}
+        self.tr = {"x" : (self.width/2) + self.x_center, "y" : (self.height/2) + self.y_center, "z" : self.z_center}
+        self.bl = {"x" : -(self.width/2) + self.x_center, "y" : -(self.height/2) + self.y_center, "z" : self.z_center}
+        self.br = {"x" : (self.width/2) + self.x_center, "y" : -(self.height/2) + self.y_center, "z" : self.z_center}
+        return {"tl" : self.tl, "tr" : self.tr, "bl" : self.bl, "br" : self.br}
 
     def get_sketch_plane(self, sketch_plane):
         if sketch_plane == "xy":
@@ -38,16 +53,16 @@ class Box:
     def create_sketch(self):
         self.sketch = self.parent_comp.sketches.add( self.sketch_plane )
         
-        pa = adsk.core.Point3D.create( -(self.width/2), -(self.height/2), 0 )
-        pb = adsk.core.Point3D.create( (self.width/2), -(self.height/2), 0 )
-        pc = adsk.core.Point3D.create( (self.width/2), (self.height/2), 0 )
-        pd = adsk.core.Point3D.create( -(self.width/2), (self.height/2), 0 )
+        bl = adsk.core.Point3D.create( **self.bl )
+        br = adsk.core.Point3D.create( **self.br )
+        tr = adsk.core.Point3D.create( **self.tr )
+        tl = adsk.core.Point3D.create( **self.tl )
 
         #-- Create Edges
-        la = self.sketch.sketchCurves.sketchLines.addByTwoPoints( pa, pb )
-        lb = self.sketch.sketchCurves.sketchLines.addByTwoPoints( pb, pc )
-        lc = self.sketch.sketchCurves.sketchLines.addByTwoPoints( pc, pd )
-        ld = self.sketch.sketchCurves.sketchLines.addByTwoPoints( pd, pa )
+        la = self.sketch.sketchCurves.sketchLines.addByTwoPoints( bl, br )
+        lb = self.sketch.sketchCurves.sketchLines.addByTwoPoints( br, tr )
+        lc = self.sketch.sketchCurves.sketchLines.addByTwoPoints( tr, tl )
+        ld = self.sketch.sketchCurves.sketchLines.addByTwoPoints( tl, bl )
 
     def create_body(self):
         features = self.parent_comp.features
@@ -64,9 +79,17 @@ class Box:
         
 
 class Keyhole():
-    def __init__(self, parent_comp, name):
+    def __init__(self, parent_comp, name, x_center=0, y_center=0, z_center=0):
         self.name = name
         self.parent_comp = parent_comp
+        self.x_center = x_center
+        self.y_center = y_center
+        self.z_center = z_center
+        self.component = None
+        self.keyhole = None
+        self.body = None
+        self.corners = {}
+
 
     def create_component(self):
         self.component = Component(self.parent_comp, self.name)
@@ -80,7 +103,10 @@ class Keyhole():
             config.keyhole_width, 
             config.keyhole_height, 
             config.keyhole_depth, 
-            "inside_cut"
+            "inside_cut",
+            x_center=self.x_center,
+            y_center=self.y_center,
+            z_center=self.z_center
             )
         
         self.keyhole = Box(
@@ -88,7 +114,10 @@ class Keyhole():
             config.keyhole_width + config.keyhole_rim_width*2, 
             config.keyhole_height + config.keyhole_rim_width*2, 
             config.keyhole_depth, 
-            "keyhole"
+            "keyhole",
+            x_center=self.x_center,
+            y_center=self.y_center,
+            z_center=self.z_center
             )
         inside_cut.create()
         self.keyhole.create()
@@ -100,7 +129,10 @@ class Keyhole():
             config.keyhole_width + 2*config.key_notch_depth, 
             config.key_notch_width, 
             config.key_notch_height, 
-            "keyclip_cut"
+            "keyclip_cut",
+            x_center=self.x_center,
+            y_center=self.y_center,
+            z_center=self.z_center
             )
         
         keyclip_cut.create()
@@ -108,19 +140,27 @@ class Keyhole():
         functions.cut_body(self.component.component, self.keyhole, keyclip_cut, keep_tool=False)
 
         self.body = self.keyhole.body
+        self.corners = self.keyhole.corners
 
 
 class Column():
-    def __init__(self, parent_comp, num_keys, name):
+    def __init__(self, parent_comp, num_keys, name, x_center=0, y_center=0, z_center=0):
         self.parent_comp = parent_comp
         self.num_keys = num_keys
         self.name = name
         self.keys = []
-        self.move_vector = {
+        self.key_center_offset = {
             'x': 0, 
             'y': config.keyhole_height + config.keyhole_rim_width*2 + config.key_vert_space, 
             'z':0
             }
+        self.component = None
+        self.corners = {}
+        self.col_center_offset = {
+            'x': x_center, 
+            'y': y_center, 
+            'z': z_center
+        }
 
     def create(self):
         self.component = Component(self.parent_comp, self.name)
@@ -132,9 +172,22 @@ class Column():
         # new_key.keyhole.sketch.sketchCurves.sketchLines.item(3).geometry.startPoint.x
 
         for key in range(self.num_keys):
-            new_key = Keyhole(self.component.component, f"row{key}")
+            new_key = Keyhole(
+                self.component.component, 
+                f"row{key}", 
+                self.key_center_offset["x"] * key + self.col_center_offset["x"], 
+                self.key_center_offset["y"] * key + self.col_center_offset["y"], 
+                self.key_center_offset["z"] * key + self.col_center_offset["z"]
+                )
             new_key.create_keyhole()
             self.keys.append(new_key)
+            if key == 0:
+                self.corners["bl"] = new_key.corners["bl"]
+                self.corners["br"] = new_key.corners["br"]
+
+            if key == self.num_keys-1:
+                self.corners["tl"] = new_key.corners["tl"]
+                self.corners["tr"] = new_key.corners["tr"]
 
             # if key == 0:
             #     new_key = Keyhole(self.component.component, f"row{key}")
@@ -151,14 +204,14 @@ class Column():
                 #     ))
 
             # functions.move_component(self.keys[key].component.component, self.move_vector["x"] * key, self.move_vector["y"] * key, self.move_vector["z"] * key)
-            if key > 0:
-                functions.move_body(
-                    self.keys[key].component.component, 
-                    self.keys[key].body, 
-                    self.move_vector["x"] * key, 
-                    self.move_vector["y"] * key, 
-                    self.move_vector["z"] * key
-                    )
+            # if key > 0:
+            #     functions.move_body(
+            #         self.keys[key].component.component, 
+            #         self.keys[key].body, 
+            #         self.key_center_offset["x"] * key, 
+            #         self.key_center_offset["y"] * key, 
+            #         self.key_center_offset["z"] * key
+            #         )
 
 class Matrix():
     def __init__(self, parent_comp, name):
@@ -166,11 +219,12 @@ class Matrix():
         self.num_cols = config.num_cols
         self.cols = []
         self.name = name
-        self.move_vector = {
+        self.col_spacing = {
             'x': config.keyhole_width + config.keyhole_rim_width*2 + config.col_space, 
             'y': 0, 
             'z':0
             }
+        self.key_stagger = config.key_stagger
 
     def create_component(self):
         self.component = Component(self.parent_comp, self.name)
@@ -183,16 +237,23 @@ class Matrix():
         #     new_col.create()
         #     self.cols.append(new_col)
 
-            if col == 0:
-                new_col = Column(self.component.component, config.num_rows, f"col{col}")
-                new_col.create()
-                self.cols.append(new_col)
+            # if col == 0:
+            new_col = Column(
+                self.component.component, 
+                config.num_rows, 
+                f"col{col}",
+                self.col_spacing["x"] * (col), 
+                self.col_spacing["y"] * (col) + self.key_stagger[col], 
+                self.col_spacing["z"] * (col)
+                )
+            new_col.create()
+            self.cols.append(new_col)
 
-            if col > 0:
-                self.cols.append(functions.copy_component(
-                    self.component.component, 
-                    self.cols[0].component.component, 
-                    self.move_vector["x"] * (col), 
-                    self.move_vector["y"] * (col), 
-                    self.move_vector["z"] * (col)
-                    ))
+            # if col > 0:
+            #     self.cols.append(functions.copy_component(
+            #         self.component.component, 
+            #         self.cols[0].component.component, 
+            #         self.move_vector["x"] * (col), 
+            #         self.move_vector["y"] * (col), 
+            #         self.move_vector["z"] * (col)
+            #         ))

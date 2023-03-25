@@ -30,15 +30,19 @@ def run(context):
         design = adsk.fusion.Design.cast( app.activeProduct )
         rootComp = design.rootComponent
 
-        keyhole1 = class_defs.Keyhole(rootComp, "row1")
+        # keyhole1 = class_defs.Keyhole(rootComp, "row1")
 
         # keyhole1.create_keyhole()
+
+        # keyhole2 = class_defs.Keyhole(rootComp, "row2", 25, 25, 25)
+
+        # keyhole2.create_keyhole()
 
         # col1 = class_defs.Column(rootComp, 3, 'col1')
         # col1.create()
 
-        # matrix = class_defs.Matrix(rootComp, "key_matrix")
-        # matrix.create()
+        matrix = class_defs.Matrix(rootComp, "key_matrix")
+        matrix.create()
 
         x = 5
         # test1 = Component(rootComp, "test1")
