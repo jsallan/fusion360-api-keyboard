@@ -1,0 +1,10 @@
+{
+	"autodeskProduct":	"Fusion360",
+	"type":	"script",
+	"author":	"JasonA",
+	"description":	{
+		"":	"A generator for a flat keyboard."
+	},
+	"supportedOS":	"windows|mac",
+	"editEnabled":	true
+}
