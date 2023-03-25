@@ -44,6 +44,8 @@ def run(context):
         matrix = class_defs.Matrix(rootComp, "key_matrix")
         matrix.create()
 
+        case = class_defs.Case(matrix, rootComp)
+
         x = 5
         # test1 = Component(rootComp, "test1")
         # test1.create_component()

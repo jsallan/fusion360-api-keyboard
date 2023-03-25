@@ -20,4 +20,4 @@ key_vert_space = 4
 col_space = 5
 
 # key stagger, positive-y [col0, col1, col2...]
-key_stagger = [0, 3, 8, 6, 6]
+key_stagger = [0, 15, 23, 19, 19]

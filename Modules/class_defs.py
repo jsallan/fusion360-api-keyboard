@@ -257,3 +257,47 @@ class Matrix():
             #         self.move_vector["y"] * (col), 
             #         self.move_vector["z"] * (col)
             #         ))
+
+class Case():
+    def __init__(self, matrix:Matrix, parent_comp, sketch_plane="xy"):
+        self.matrix = matrix
+        self.parent_comp = parent_comp
+        self.sketch_plane = self.get_sketch_plane(sketch_plane)
+        self.case_points = []
+        self.get_point_series()
+        self.create()
+
+    def get_point_series(self):
+        # get series of points starting on col0 tl, col0 tr, col1 tl etc
+        for col in self.matrix.cols:
+            self.case_points.append(col.corners["tl"])
+            self.case_points.append(col.corners["tr"])
+        
+        for col in reversed(self.matrix.cols):
+            self.case_points.append(col.corners["br"])
+            self.case_points.append(col.corners["bl"])
+
+    def get_sketch_plane(self, sketch_plane):
+        if sketch_plane == "xy":
+            return self.parent_comp.xYConstructionPlane
+        if sketch_plane == "yz":
+            return self.parent_comp.yZConstructionPlane
+        if sketch_plane == "xz":
+            return self.parent_comp.xZConstructionPlane
+    
+    def create(self):
+        self.create_sketch()
+
+    def create_sketch(self):
+        self.sketch = self.parent_comp.sketches.add( self.sketch_plane )
+        
+        for index in range(len(self.case_points) - 1):
+            point1 = adsk.core.Point3D.create(**self.case_points[index])
+            point2 = adsk.core.Point3D.create(**self.case_points[index+1])
+
+            self.sketch.sketchCurves.sketchLines.addByTwoPoints(point1, point2)
+
+        point1 = adsk.core.Point3D.create(**self.case_points[-1])
+        point2 = adsk.core.Point3D.create(**self.case_points[0])
+
+        self.sketch.sketchCurves.sketchLines.addByTwoPoints(point1, point2)
