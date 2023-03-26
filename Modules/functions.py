@@ -1,4 +1,5 @@
 import adsk.core, adsk.fusion, adsk.cam, traceback
+import math
 
 mm = 0.1
 
@@ -50,3 +51,36 @@ def cut_body(component, target, tool, keep_tool=False):
     CombineCutInput.isKeepToolBodies = keep_tool
     CombineCutInput.operation = adsk.fusion.FeatureOperations.CutFeatureOperation
     CombineCutFeats.add(CombineCutInput)
+
+def angle_between_lines(line1, line2):
+    # α = arccos[(xa · xb + ya · yb + za · zb) / (√(xa² + ya² + za²) · √(xb² + yb² + zb²))]
+    l1_start, l1_end = get_coords_from_line(line1)
+    l2_start, l2_end = get_coords_from_line(line2)
+    xa = l1_end["x"]-l1_start["x"]
+    ya = l1_end["y"]-l1_start["y"]
+    za = l1_end["z"]-l1_start["z"]
+    xb = l2_end["x"]-l2_start["x"]
+    yb = l2_end["y"]-l2_start["y"]
+    zb = l2_end["z"]-l2_start["z"]
+    
+    # A = (xa · xb + ya · yb + za · zb)
+    A = (xa * xb + ya * yb + za * zb)
+    
+    # B = √(xa² + ya² + za²)
+    # C = √(xb² + yb² + zb²)
+    B = math.sqrt(xa*xa + ya*ya + za*za)
+    C = math.sqrt(xb*xb + yb*yb + zb*zb)
+    
+    # arccos[A/(B*C)]
+    return math.degrees(math.acos(A/(B*C)))
+
+def get_coords_from_line(line):
+    return {
+        "x":line.startSketchPoint.geometry.x, 
+        "y":line.startSketchPoint.geometry.y, 
+        "z":line.startSketchPoint.geometry.z
+        }, {
+        "x":line.endSketchPoint.geometry.x, 
+        "y":line.endSketchPoint.geometry.y,
+        "z":line.endSketchPoint.geometry.z
+        }

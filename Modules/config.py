@@ -21,3 +21,6 @@ col_space = 5
 
 # key stagger, positive-y [col0, col1, col2...]
 key_stagger = [0, 15, 23, 19, 19]
+
+# case parameters
+fillet = 3

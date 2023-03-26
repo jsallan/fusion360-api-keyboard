@@ -290,14 +290,46 @@ class Case():
 
     def create_sketch(self):
         self.sketch = self.parent_comp.sketches.add( self.sketch_plane )
+        self.sketch_lines = self.sketch.sketchCurves.sketchLines
+        # self.matrix_outline = adsk.core.ObjectCollection.create()
+        self.matrix_outline = []
         
-        for index in range(len(self.case_points) - 1):
-            point1 = adsk.core.Point3D.create(**self.case_points[index])
-            point2 = adsk.core.Point3D.create(**self.case_points[index+1])
+        start_pt = adsk.core.Point3D.create(**self.case_points[0])
+        for index in range(1, len(self.case_points), 1):
+            point = adsk.core.Point3D.create(**self.case_points[index])
+            # point2 = adsk.core.Point3D.create(**self.case_points[index+1])
 
-            self.sketch.sketchCurves.sketchLines.addByTwoPoints(point1, point2)
+            # self.matrix_outline.add(self.sketch_lines.addByTwoPoints(start_pt, point))
+            new_line = self.sketch_lines.addByTwoPoints(start_pt, point)
+            self.matrix_outline.append(new_line)
+            # if index > 1:
+            #     self.sketch.sketchCurves.sketchArcs.addFillet(last_line, last_line.endSketchPoint.geometry, new_line, new_line.endSketchPoint.geometry, 1*mm)
+            start_pt = new_line.endSketchPoint
+            # last_line = new_line
 
-        point1 = adsk.core.Point3D.create(**self.case_points[-1])
-        point2 = adsk.core.Point3D.create(**self.case_points[0])
+        point = adsk.core.Point3D.create(**self.case_points[0])
+        new_line = self.sketch_lines.addByTwoPoints(start_pt, point)
+        # point1 = adsk.core.Point3D.create(**self.case_points[-1])
+        # point2 = adsk.core.Point3D.create(**self.case_points[0])
 
-        self.sketch.sketchCurves.sketchLines.addByTwoPoints(point1, point2)
+        # self.matrix_outline.add(self.sketch_lines.addByTwoPoints(point1, point2))
+
+        curves = self.sketch.findConnectedCurves(self.sketch_lines.item(0))
+        dirPoint = adsk.core.Point3D.create(0,500,0)
+        self.offset_curves = self.sketch.offset(curves, dirPoint, 5*mm)
+
+        # for index in range(len(self.offset_curves.item)-1):
+        #     functions.
+
+        for index in range(len(self.matrix_outline)):
+            line1 = self.offset_curves.item(index)
+            line2 = self.offset_curves.item(index+1)
+            if functions.angle_between_lines(line1, line2) > 0:
+                self.sketch.sketchCurves.sketchArcs.addFillet(line1, line1.endSketchPoint.geometry, line2, line2.startSketchPoint.geometry, config.fillet*mm)
+        else:
+            line1 = self.offset_curves.item(len(self.matrix_outline))
+            line2 = self.offset_curves.item(0)
+            if functions.angle_between_lines(line1, line2) > 0:
+                self.sketch.sketchCurves.sketchArcs.addFillet(line1, line1.endSketchPoint.geometry, line2, line2.startSketchPoint.geometry, config.fillet*mm)
+
+
