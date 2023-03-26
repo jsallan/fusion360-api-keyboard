@@ -1,6 +1,7 @@
 # Matrix definition
 num_rows = 3
 num_cols = 5
+num_thumb_keys = 3
 
 # Keyhole definitions
 

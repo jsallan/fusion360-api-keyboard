@@ -336,3 +336,16 @@ class Case():
                 self.sketch.sketchCurves.sketchArcs.addFillet(line1, line1.endSketchPoint.geometry, line2, line2.startSketchPoint.geometry, config.fillet*mm)
 
 
+class Thumbs():
+    def __init__(self, parent_comp, num_keys, name):
+        self.num_keys = num_keys
+        self.parent_comp = parent_comp
+        self.name = name
+        self.component = None
+    
+    def create_component(self):
+        self.component = Component(self.parent_comp, self.name)
+        self.component.create_component()
+
+    def create_thumbs(self):
+        pass
