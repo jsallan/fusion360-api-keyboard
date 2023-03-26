@@ -3,15 +3,15 @@ from . import config, functions
 
 mm = 0.1
 
-class Component:
-    def __init__(self, parent_comp, name):
-        self.parent_comp = parent_comp
-        self.name = name
+# class Component:
+#     def __init__(self, parent_comp, name):
+#         self.parent_comp = parent_comp
+#         self.name = name
 
-    def create_component(self):
-        # if self.parent_comp.isRootComponent:
-        self.component = self.parent_comp.occurrences.addNewComponent(adsk.core.Matrix3D.create()).component
-        self.component.name = self.name
+#     def create_component(self):
+#         # if self.parent_comp.isRootComponent:
+#         self.component = self.parent_comp.occurrences.addNewComponent(adsk.core.Matrix3D.create()).component
+#         self.component.name = self.name
 
 
 class Box:
@@ -92,14 +92,15 @@ class Keyhole():
 
 
     def create_component(self):
-        self.component = Component(self.parent_comp, self.name)
-        self.component.create_component()
+        self.component = functions.create_component(self.parent_comp, self.name)
+        # self.component = Component(self.parent_comp, self.name)
+        # self.component.create_component()
 
     def create_keyhole(self):
         self.create_component()
         
         inside_cut = Box(
-            self.component.component, 
+            self.component, 
             config.keyhole_width, 
             config.keyhole_height, 
             config.keyhole_depth, 
@@ -110,7 +111,7 @@ class Keyhole():
             )
         
         self.keyhole = Box(
-            self.component.component, 
+            self.component, 
             config.keyhole_width + config.keyhole_rim_width*2, 
             config.keyhole_height + config.keyhole_rim_width*2, 
             config.keyhole_depth, 
@@ -122,10 +123,10 @@ class Keyhole():
         inside_cut.create()
         self.keyhole.create()
 
-        functions.cut_body(self.component.component, self.keyhole, inside_cut, keep_tool=False)
+        functions.cut_body(self.component, self.keyhole, inside_cut, keep_tool=False)
 
         keyclip_cut = Box(
-            self.component.component, 
+            self.component, 
             config.keyhole_width + 2*config.key_notch_depth, 
             config.key_notch_width, 
             config.key_notch_height, 
@@ -137,7 +138,7 @@ class Keyhole():
         
         keyclip_cut.create()
 
-        functions.cut_body(self.component.component, self.keyhole, keyclip_cut, keep_tool=False)
+        functions.cut_body(self.component, self.keyhole, keyclip_cut, keep_tool=False)
 
         self.body = self.keyhole.body
         self.corners = self.keyhole.corners
@@ -163,8 +164,9 @@ class Column():
         }
 
     def create(self):
-        self.component = Component(self.parent_comp, self.name)
-        self.component.create_component()
+        self.component = functions.create_component(self.parent_comp, self.name)
+        # self.component = Component(self.parent_comp, self.name)
+        # self.component.create_component()
 
 
 
@@ -173,7 +175,7 @@ class Column():
 
         for key in range(self.num_keys):
             new_key = Keyhole(
-                self.component.component, 
+                self.component, 
                 f"row{key}", 
                 self.key_center_offset["x"] * key + self.col_center_offset["x"], 
                 self.key_center_offset["y"] * key + self.col_center_offset["y"], 
@@ -227,8 +229,9 @@ class Matrix():
         self.key_stagger = config.key_stagger
 
     def create_component(self):
-        self.component = Component(self.parent_comp, self.name)
-        self.component.create_component()
+        self.component = functions.create_component(self.parent_comp, self.name)
+        # self.component = Component(self.parent_comp, self.name)
+        # self.component.create_component()
 
     def create(self):
         self.create_component()
@@ -239,7 +242,7 @@ class Matrix():
 
             # if col == 0:
             new_col = Column(
-                self.component.component, 
+                self.component, 
                 config.num_rows, 
                 f"col{col}",
                 self.col_spacing["x"] * (col), 

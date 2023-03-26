@@ -3,6 +3,11 @@ import math
 
 mm = 0.1
 
+def create_component(parent_comp, name):
+    component = parent_comp.occurrences.addNewComponent(adsk.core.Matrix3D.create()).component
+    component.name = name
+    return component
+
 def copy_component(parent_comp, source_comp, x=0, y=0, z=0):
     # if x or y or z is not 0:
     vector = adsk.core.Vector3D.create(x*mm, y*mm, z*mm)
