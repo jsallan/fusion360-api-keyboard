@@ -143,6 +143,9 @@ class Keyhole():
         self.body = self.keyhole.body
         self.corners = self.keyhole.corners
 
+    def get_corner_coords(self, corner):
+        return self.corners[corner]
+
 
 class Column():
     def __init__(self, parent_comp, num_keys, name, x_center=0, y_center=0, z_center=0):
@@ -341,11 +344,7 @@ class Thumbs():
         self.num_keys = num_keys
         self.parent_comp = parent_comp
         self.name = name
-        self.component = None
+        self.component = functions.create_component(self.parent_comp, self.name)
     
-    def create_component(self):
-        self.component = Component(self.parent_comp, self.name)
-        self.component.create_component()
-
     def create_thumbs(self):
         pass

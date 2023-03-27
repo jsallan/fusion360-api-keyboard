@@ -3,6 +3,17 @@ import math
 
 mm = 0.1
 
+def minidox_thumbs(num_keys, over, up, radius, key_space, key1_angle):
+    alpha = math.asin((key_space / 2) / radius)
+    key_locs = {}
+    for key in range(num_keys):
+        key_locs[f"key{key}"] = {
+            "x" : (radius * math.sin(2 * alpha * key + key1_angle) + over) * mm, 
+            "y" : (radius * math.cos(2 * alpha * key + key1_angle) + up) * mm
+            }
+    return key_locs
+
+
 def create_component(parent_comp, name):
     component = parent_comp.occurrences.addNewComponent(adsk.core.Matrix3D.create()).component
     component.name = name
