@@ -41,7 +41,7 @@ def run(context):
         # col1 = class_defs.Column(rootComp, 3, 'col1')
         # col1.create()
 
-        matrix = class_defs.Matrix2(rootComp, "key_matrix")
+        matrix = class_defs.Matrix(rootComp, "key_matrix")
         matrix.create()
 
         case = class_defs.Case(matrix, rootComp)
