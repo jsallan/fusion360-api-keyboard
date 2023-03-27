@@ -19,8 +19,8 @@ key_vert_space = 4
 # spacing between columns
 col_space = 5
 
-# key stagger, positive-y [col0, col1, col2...]
-key_stagger = [0, 15, 23, 19, 19]
+# column key stagger, positive-y [col0, col1, col2...] i.e. [pinky, ring, middle, etc]
+col_stagger = [0, 15, 23, 19, 19]
 
 # case parameters
 fillet = 3

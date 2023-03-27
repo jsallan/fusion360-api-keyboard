@@ -1,7 +1,22 @@
 import adsk.core, adsk.fusion, adsk.cam, traceback
+from . import config
 import math
 
 mm = 0.1
+
+def place_matrix_keys(col):
+    key_locs = {}
+    x_key_spacing = config.keyhole_width + config.keyhole_rim_width*2 + config.col_space
+    y_key_center_offset = config.keyhole_height + config.keyhole_rim_width*2 + config.key_vert_space
+    y_col_stagger = config.col_stagger
+    for key in range(config.num_rows):
+            key_locs[key] = {
+                "x" : col * x_key_spacing, 
+                "y" : key * y_key_center_offset + y_col_stagger[col],
+                "z" : 0
+                }
+
+    return key_locs
 
 def create_component(parent_comp, name):
     component = parent_comp.occurrences.addNewComponent(adsk.core.Matrix3D.create()).component
