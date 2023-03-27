@@ -4,13 +4,14 @@ import math
 
 mm = 0.1
 
-def minidox_thumbs(num_keys, over, up, radius, key_space, key1_angle):
-    alpha = math.asin((key_space / 2) / radius)
+def minidox_thumbs(col):
+    alpha = math.asin((config.minidox_key_space / 2) / config.minidox_radius)
     key_locs = {}
-    for key in range(num_keys):
-        key_locs[f"key{key}"] = {
-            "x" : (radius * math.sin(2 * alpha * key + key1_angle) + over) * mm, 
-            "y" : (radius * math.cos(2 * alpha * key + key1_angle) + up) * mm
+    for key in range(config.minidox_num_thumb_keys):
+        key_locs[key] = {
+            "x" : (config.minidox_radius * math.sin(2 * alpha * key + config.minidox_key1_angle) + config.minidox_over), 
+            "y" : (config.minidox_radius * math.cos(2 * alpha * key + config.minidox_key1_angle) + config.minidox_up),
+            "z" : 0
             }
     return key_locs
 

@@ -286,3 +286,34 @@ class Thumbs():
     
     def create_thumbs(self):
         pass
+
+class Thumbs2():
+    def __init__(self, parent_comp, name, col, placement_function):
+        self.parent_comp = parent_comp
+        self.num_keys = config.minidox_num_thumb_keys
+        self.name = name
+        self.col = col
+        self.keys = []
+        self.component = None
+        self.corners = {}
+        self.key_center_locs = placement_function(self.col)
+
+    def create(self):
+        self.component = functions.create_component(self.parent_comp, self.name)
+
+        for key in range(self.num_keys):
+            new_key = object_factories.keyhole_factory(
+                self.component, 
+                f"row{key}", 
+                self.key_center_locs[key]["x"], 
+                self.key_center_locs[key]["y"], 
+                self.key_center_locs[key]["z"],
+                )
+            self.keys.append(new_key)
+            if key == 0:
+                self.corners["bl"] = new_key.corners["bl"]
+                self.corners["br"] = new_key.corners["br"]
+
+            if key == self.num_keys-1:
+                self.corners["tl"] = new_key.corners["tl"]
+                self.corners["tr"] = new_key.corners["tr"]

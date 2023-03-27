@@ -1,7 +1,14 @@
 # Matrix definition
 num_rows = 3
 num_cols = 5
-num_thumb_keys = 3
+
+# 3-key thumb definition
+minidox_num_thumb_keys = 3
+minidox_over = 130
+minidox_up = -100
+minidox_radius = 90
+minidox_key_space = -30
+minidox_key1_angle = 170 # degrees
 
 # Keyhole definitions
 

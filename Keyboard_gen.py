@@ -2,7 +2,7 @@
 #Description-
 
 import adsk.core, adsk.fusion, adsk.cam, traceback
-from .Modules import config, class_defs
+from .Modules import config, class_defs, functions
 
 
 mm = 0.1
@@ -45,6 +45,9 @@ def run(context):
         matrix.create()
 
         case = class_defs.Case(matrix, rootComp)
+
+        thumbs = class_defs.Thumbs2(rootComp, "thumbs", 0, functions.minidox_thumbs)
+        thumbs.create()
 
         x = 5
         # test1 = Component(rootComp, "test1")
