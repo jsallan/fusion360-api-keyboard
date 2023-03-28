@@ -1,7 +1,7 @@
 #Author-
 #Description-
 
-import adsk.core, adsk.fusion, adsk.cam, traceback
+import adsk.core, adsk.fusion, adsk.cam, traceback, sys
 from .Modules import config, class_defs, functions
 
 
@@ -16,7 +16,8 @@ mm = 0.1
 # key_notch_depth = 0.5
 # key_notch_height = 2
 
-
+class ConfigException(Exception):
+    pass
 
 
 
@@ -26,6 +27,14 @@ def run(context):
     try:
         app = adsk.core.Application.get()
         ui  = app.userInterface
+
+        if config.num_cols != len(config.col_stagger):
+            ui.messageBox("Can not build keyboard. Please make sure each column has a stagger, i.e. num_cols == len(col_stagger)")
+            sys.exit('Cancelled')
+            # raise ConfigException({
+            #     "message": "Can not build keyboard.",
+            #     "details" : "Please make sure each column has a stagger, i.e. num_cols == len(col_stagger)"
+            #     })
 
         design = adsk.fusion.Design.cast( app.activeProduct )
         rootComp = design.rootComponent
@@ -56,6 +65,9 @@ def run(context):
         # box_test = Box(test1.component, params.keyhole_width, params.keyhole_height, params.keyhole_depth)
         # box_test.create_sketch()
         # box_test.create_body()
+    # except ConfigException as e:
+    #     if ui:
+    #         ui.messageBox(e.args[0] + "\n" + e.args[1])
 
     except:
         if ui:

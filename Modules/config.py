@@ -1,9 +1,12 @@
 # Matrix definition
-num_rows = 3
-num_cols = 5
+num_rows = 4
+num_cols = 6 # make sure num cols has the same number of staggers
+
+# column key stagger, positive-y [col0, col1, col2...] i.e. [pinky, ring, middle, etc]
+col_stagger = [0, 15, 23, 19, 19]
 
 # 3-key thumb definition
-minidox_num_thumb_keys = 3
+minidox_num_thumb_keys = 4
 minidox_over = 100
 minidox_up = -100
 minidox_radius = 90
@@ -27,8 +30,7 @@ key_vert_space = 4
 # spacing between columns
 col_space = 5
 
-# column key stagger, positive-y [col0, col1, col2...] i.e. [pinky, ring, middle, etc]
-col_stagger = [0, 15, 23, 19, 19]
+
 
 # case parameters
 fillet = 3
