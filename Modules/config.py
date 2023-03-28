@@ -4,11 +4,11 @@ num_cols = 5
 
 # 3-key thumb definition
 minidox_num_thumb_keys = 3
-minidox_over = 130
+minidox_over = 100
 minidox_up = -100
 minidox_radius = 90
-minidox_key_space = -30
-minidox_key1_angle = 170 # degrees
+minidox_key_space = 30
+minidox_key1_angle = 45 # degrees
 
 # Keyhole definitions
 

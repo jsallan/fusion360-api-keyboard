@@ -5,19 +5,22 @@ import math
 mm = 0.1
 
 def minidox_thumbs(col):
-    alpha = math.asin((config.minidox_key_space / 2) / config.minidox_radius)
+    alpha = math.degrees(math.asin((config.minidox_key_space / 2) / config.minidox_radius))
     key_locs = {}
+    key_rots = list()
     for key in range(config.minidox_num_thumb_keys):
         key_locs[key] = {
-            "x" : (config.minidox_radius * math.sin(2 * alpha * key + config.minidox_key1_angle) + config.minidox_over), 
-            "y" : (config.minidox_radius * math.cos(2 * alpha * key + config.minidox_key1_angle) + config.minidox_up),
+            "x" : (config.minidox_radius * math.cos(math.radians(2 * alpha * key + config.minidox_key1_angle)) + config.minidox_over), 
+            "y" : (config.minidox_radius * math.sin(math.radians(2 * alpha * key + config.minidox_key1_angle)) + config.minidox_up),
             "z" : 0
             }
-    return key_locs
+        key_rots.append(2 * alpha * key + config.minidox_key1_angle)
+    return key_locs, key_rots
 
 
 def place_matrix_keys(col):
     key_locs = {}
+    key_rots = list()
     x_key_spacing = config.keyhole_width + config.keyhole_rim_width*2 + config.col_space
     y_key_center_offset = config.keyhole_height + config.keyhole_rim_width*2 + config.key_vert_space
     y_col_stagger = config.col_stagger
@@ -27,8 +30,9 @@ def place_matrix_keys(col):
                 "y" : key * y_key_center_offset + y_col_stagger[col],
                 "z" : 0
                 }
+            key_rots.append(0)
 
-    return key_locs
+    return key_locs, key_rots
 
 def create_component(parent_comp, name):
     component = parent_comp.occurrences.addNewComponent(adsk.core.Matrix3D.create()).component

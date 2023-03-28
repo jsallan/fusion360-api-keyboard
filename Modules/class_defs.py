@@ -1,4 +1,4 @@
-import adsk.core, adsk.fusion, adsk.cam, traceback
+import adsk.core, adsk.fusion, adsk.cam, traceback, math
 from . import config, functions, object_factories
 
 mm = 0.1
@@ -15,7 +15,7 @@ mm = 0.1
 
 
 class Box:
-    def __init__(self, parent_comp, height, width, depth, name, sketch_plane="xy", x_center=0, y_center=0, z_center=0):
+    def __init__(self, parent_comp, height, width, depth, name, sketch_plane="xy", x_center=0, y_center=0, z_center=0, rotation=0):
         self.parent_comp = parent_comp
         self.sketch_plane = self.get_sketch_plane(sketch_plane)
         self.height = height * mm
@@ -25,6 +25,7 @@ class Box:
         self.x_center = x_center * mm
         self.y_center = y_center * mm
         self.z_center = z_center * mm
+        self.rotation = rotation
         self.corners = self.create_corners()
         self.sketch = None
         self.body = None
@@ -32,10 +33,48 @@ class Box:
 
     def create_corners(self):
         # (x, y, z)
-        self.tl = {"x" : -(self.width/2) + self.x_center, "y" : (self.height/2) + self.y_center, "z" : self.z_center}
-        self.tr = {"x" : (self.width/2) + self.x_center, "y" : (self.height/2) + self.y_center, "z" : self.z_center}
-        self.bl = {"x" : -(self.width/2) + self.x_center, "y" : -(self.height/2) + self.y_center, "z" : self.z_center}
-        self.br = {"x" : (self.width/2) + self.x_center, "y" : -(self.height/2) + self.y_center, "z" : self.z_center}
+        hypoteneus = math.sqrt(math.pow((self.width/2), 2) + math.pow((self.height/2), 2))
+        theta = math.degrees(math.atan((self.height/2)/(self.width/2)))
+        # self.tl = {
+        #     "x" : (-(self.width/2)) * math.cos(math.radians(45+self.rotation)) + self.x_center, 
+        #     "y" : ((self.height/2)) * math.sin(math.radians(45+self.rotation)) + self.y_center, 
+        #     "z" : self.z_center
+        #     }
+        # self.tr = {
+        #     "x" : ((self.width/2)) * math.cos(math.radians(45+self.rotation)) + self.x_center, 
+        #     "y" : ((self.height/2)) * math.sin(math.radians(45+self.rotation)) + self.y_center, 
+        #     "z" : self.z_center
+        #     }
+        # self.bl = {
+        #     "x" : (-(self.width/2)) * math.cos(math.radians(45+self.rotation)) + self.x_center, 
+        #     "y" : (-(self.height/2)) * math.sin(math.radians(45+self.rotation)) + self.y_center, 
+        #     "z" : self.z_center
+        #     }
+        # self.br = {
+        #     "x" : ((self.width/2)) * math.cos(math.radians(45+self.rotation)) + self.x_center, 
+        #     "y" : (-(self.height/2)) * math.sin(math.radians(45+self.rotation)) + self.y_center, 
+        #     "z" : self.z_center
+        #     }
+        self.tl = {
+            "x" : (hypoteneus) * math.cos(math.radians(180-theta+self.rotation)) + self.x_center, 
+            "y" : (hypoteneus) * math.sin(math.radians(180-theta+self.rotation)) + self.y_center, 
+            "z" : self.z_center
+            }
+        self.tr = {
+            "x" : (hypoteneus) * math.cos(math.radians(theta+self.rotation)) + self.x_center, 
+            "y" : (hypoteneus) * math.sin(math.radians(theta+self.rotation)) + self.y_center, 
+            "z" : self.z_center
+            }
+        self.bl = {
+            "x" : (hypoteneus) * math.cos(math.radians(180+theta+self.rotation)) + self.x_center, 
+            "y" : (hypoteneus) * math.sin(math.radians(180+theta+self.rotation)) + self.y_center, 
+            "z" : self.z_center
+            }
+        self.br = {
+            "x" : (hypoteneus) * math.cos(math.radians(360-theta+self.rotation)) + self.x_center, 
+            "y" : (hypoteneus) * math.sin(math.radians(360-theta+self.rotation)) + self.y_center, 
+            "z" : self.z_center
+            }
         return {"tl" : self.tl, "tr" : self.tr, "bl" : self.bl, "br" : self.br}
 
     def get_sketch_plane(self, sketch_plane):
@@ -79,7 +118,7 @@ class Box:
         
 
 class Keyhole():
-    def __init__(self, parent_comp, name, x_center=0, y_center=0, z_center=0):
+    def __init__(self, parent_comp, name, x_center=0, y_center=0, z_center=0, key_rotation=0):
         self.name = name
         self.parent_comp = parent_comp
         self.x_center = x_center
@@ -89,7 +128,7 @@ class Keyhole():
         self.keyhole = None
         self.body = None
         self.corners = {}
-
+        self.key_rotation = key_rotation # degrees
 
     def create_component(self):
         self.component = functions.create_component(self.parent_comp, self.name)
@@ -107,7 +146,8 @@ class Keyhole():
             "inside_cut",
             x_center=self.x_center,
             y_center=self.y_center,
-            z_center=self.z_center
+            z_center=self.z_center,
+            rotation = self.key_rotation
             )
         
         self.keyhole = Box(
@@ -118,7 +158,8 @@ class Keyhole():
             "keyhole",
             x_center=self.x_center,
             y_center=self.y_center,
-            z_center=self.z_center
+            z_center=self.z_center, 
+            rotation = self.key_rotation
             )
         inside_cut.create()
         self.keyhole.create()
@@ -133,7 +174,8 @@ class Keyhole():
             "keyclip_cut",
             x_center=self.x_center,
             y_center=self.y_center,
-            z_center=self.z_center
+            z_center=self.z_center, 
+            rotation = self.key_rotation
             )
         
         keyclip_cut.create()
@@ -156,7 +198,7 @@ class Column():
         self.keys = []
         self.component = None
         self.corners = {}
-        self.key_center_locs = placement_function(self.col)
+        self.key_center_locs, self.key_rots = placement_function(self.col)
 
     def create(self):
         self.component = functions.create_component(self.parent_comp, self.name)
@@ -168,6 +210,7 @@ class Column():
                 self.key_center_locs[key]["x"], 
                 self.key_center_locs[key]["y"], 
                 self.key_center_locs[key]["z"],
+                self.key_rots[key]
                 )
             self.keys.append(new_key)
             if key == 0:
@@ -296,7 +339,7 @@ class Thumbs2():
         self.keys = []
         self.component = None
         self.corners = {}
-        self.key_center_locs = placement_function(self.col)
+        self.key_center_locs, self.key_rots = placement_function(self.col)
 
     def create(self):
         self.component = functions.create_component(self.parent_comp, self.name)
@@ -308,6 +351,7 @@ class Thumbs2():
                 self.key_center_locs[key]["x"], 
                 self.key_center_locs[key]["y"], 
                 self.key_center_locs[key]["z"],
+                self.key_rots[key]
                 )
             self.keys.append(new_key)
             if key == 0:
@@ -317,3 +361,5 @@ class Thumbs2():
             if key == self.num_keys-1:
                 self.corners["tl"] = new_key.corners["tl"]
                 self.corners["tr"] = new_key.corners["tr"]
+
+
