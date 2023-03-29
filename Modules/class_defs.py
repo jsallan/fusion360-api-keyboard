@@ -391,7 +391,7 @@ class MCU_cutter():
         x_center = self.tl_x + config.MCU_cut_width/2 + config.MCU_space_to_tr_key
         y_center = self.tl_y - config.MCU_cut_height/2
         z_center = self.tl_z
-        mcu_pcb_cutter = object_factories.box_factory(
+        self.mcu_pcb_cutter = object_factories.box_factory(
             self.component, 
             self.name, 
             config.MCU_cut_height + config.MCU_lip, 
@@ -402,7 +402,7 @@ class MCU_cutter():
             y_center=y_center + config.MCU_lip/2,
             z_center=z_center
             )
-        mcu_cutter = object_factories.box_factory(
+        self.mcu_cutter = object_factories.box_factory(
             self.component, 
             self.name, 
             config.MCU_cut_height, 
@@ -413,4 +413,19 @@ class MCU_cutter():
             y_center=y_center,
             z_center=z_center
             )
+        self.usb_cutter = object_factories.box_factory(
+            self.component,
+            "usb_cutter",
+            config.MCU_USB_height,
+            config.MCU_USB_width,
+            config.MCU_USB_extrude,
+            0,
+            x_center=x_center,
+            y_center=y_center + config.MCU_cut_height/2,
+            z_center=z_center + config.MCU_USB_zoffset
+        )
+        x = 10
+        self.get_corners()
 
+    def get_corners(self):
+        self.corners = self.mcu_cutter.corners
