@@ -1,11 +1,11 @@
 # Matrix definition
-num_rows = 4
-num_cols = 6 # make sure num cols has the same number of staggers
+num_rows = 3
+num_cols = 5 # make sure num cols has the same number of staggers
 
 # column key stagger, positive-y [col0, col1, col2...] i.e. [pinky, ring, middle, etc]
 col_stagger = [0, 15, 23, 19, 19]
 
-# 3-key thumb definition
+# 3-key thumb definition for functions.minidox_thumbs()
 minidox_num_thumb_keys = 4
 minidox_over = 100
 minidox_up = -100
@@ -30,7 +30,16 @@ key_vert_space = 4
 # spacing between columns
 col_space = 5
 
-
-
 # case parameters
 fillet = 3
+
+# MCU cutter
+MCU_cut_width = 18
+MCU_cut_height = 33.8
+MCU_cut_extrude = -15
+MCU_PCB_thickness = 1.6
+MCU_lip = 1.5
+MCU_USB_width = 9
+MCU_USB_height = 3.95
+MCU_USB_zoffset = 0.8
+MCU_space_to_tr_key = 5

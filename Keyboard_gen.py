@@ -31,10 +31,7 @@ def run(context):
         if config.num_cols != len(config.col_stagger):
             ui.messageBox("Can not build keyboard. Please make sure each column has a stagger, i.e. num_cols == len(col_stagger)")
             sys.exit('Cancelled')
-            # raise ConfigException({
-            #     "message": "Can not build keyboard.",
-            #     "details" : "Please make sure each column has a stagger, i.e. num_cols == len(col_stagger)"
-            #     })
+
 
         design = adsk.fusion.Design.cast( app.activeProduct )
         rootComp = design.rootComponent
@@ -50,13 +47,15 @@ def run(context):
         # col1 = class_defs.Column(rootComp, 3, 'col1')
         # col1.create()
 
-        matrix = class_defs.Matrix(rootComp, "key_matrix")
-        matrix.create()
+        # matrix = class_defs.Matrix(rootComp, "key_matrix")
+        # matrix.create()
 
-        case = class_defs.Case(matrix, rootComp)
+        # case = class_defs.Case(matrix, rootComp)
 
-        thumbs = class_defs.Thumbs2(rootComp, "thumbs", 0, functions.minidox_thumbs)
-        thumbs.create()
+        # thumbs = class_defs.Thumbs2(rootComp, "thumbs", 0, functions.minidox_thumbs)
+        # thumbs.create()
+
+        keyboard = class_defs.Keyboard(rootComp, "keyboard", functions.minidox_thumbs)
 
         x = 5
         # test1 = Component(rootComp, "test1")

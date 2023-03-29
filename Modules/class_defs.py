@@ -15,7 +15,7 @@ mm = 0.1
 
 
 class Box:
-    def __init__(self, parent_comp, height, width, depth, name, sketch_plane="xy", x_center=0, y_center=0, z_center=0, rotation=0):
+    def __init__(self, parent_comp, height, width, depth, name, sketch_plane="xy", x_center=0.0, y_center=0.0, z_center=0.0, rotation=0):
         self.parent_comp = parent_comp
         self.sketch_plane = self.get_sketch_plane(sketch_plane)
         self.height = height * mm
@@ -228,6 +228,7 @@ class Matrix():
         self.num_cols = config.num_cols
         self.cols = []
         self.name = name
+        self.corners = {}
 
     def create_component(self):
         self.component = functions.create_component(self.parent_comp, self.name)
@@ -244,6 +245,28 @@ class Matrix():
                 )
             new_col.create()
             self.cols.append(new_col)
+            self.get_corners()
+    
+    def get_corners(self):
+        self.corners = {
+            "tl" : self.cols[0].corners["tl"], 
+            "tr" : self.cols[-1].corners["tr"],
+            "bl" : self.cols[0].corners["bl"],
+            "bl" : self.cols[-1].corners["br"]
+        }
+
+
+
+class Keyboard():
+    def __init__(self, parent_comp, name, thumb_placement):
+        self.parent_comp = parent_comp
+        self.name = name
+        self.component = functions.create_component(self.parent_comp, "keyboard")
+        self.key_matrix = object_factories.matrix_factory(self.component, "matrix")
+        self.thumbs = object_factories.thumbs_factory(self.component, "thumbs", 0, thumb_placement)
+        self.mcu_cutter = object_factories.mcu_cutter_factory(self.component, "mcu_cutter", tl_x=self.key_matrix.corners["tr"]["x"]/mm, tl_y=self.key_matrix.corners["tr"]["y"]/mm)
+
+
 
 class Case():
     def __init__(self, matrix, parent_comp, sketch_plane="xy"):
@@ -319,18 +342,7 @@ class Case():
             if functions.angle_between_lines(line1, line2) > 0:
                 self.sketch.sketchCurves.sketchArcs.addFillet(line1, line1.endSketchPoint.geometry, line2, line2.startSketchPoint.geometry, config.fillet*mm)
 
-
 class Thumbs():
-    def __init__(self, parent_comp, num_keys, name):
-        self.num_keys = num_keys
-        self.parent_comp = parent_comp
-        self.name = name
-        self.component = functions.create_component(self.parent_comp, self.name)
-    
-    def create_thumbs(self):
-        pass
-
-class Thumbs2():
     def __init__(self, parent_comp, name, col, placement_function):
         self.parent_comp = parent_comp
         self.num_keys = config.minidox_num_thumb_keys
@@ -362,4 +374,43 @@ class Thumbs2():
                 self.corners["tl"] = new_key.corners["tl"]
                 self.corners["tr"] = new_key.corners["tr"]
 
+
+class MCU_cutter():
+    def __init__(self, parent_comp, name, tl_x=0, tl_y=0, tl_z=0):
+        self.name = name
+        self.parent_comp = parent_comp
+        self.component = None
+        self.corners = {}
+        self.tl_x = tl_x
+        self.tl_y = tl_y
+        self.tl_z = tl_z
+    
+    def create(self):
+        self.component = functions.create_component(self.parent_comp, self.name)
+
+        x_center = self.tl_x + config.MCU_cut_width/2 + config.MCU_space_to_tr_key
+        y_center = self.tl_y - config.MCU_cut_height/2
+        z_center = self.tl_z
+        mcu_pcb_cutter = object_factories.box_factory(
+            self.component, 
+            self.name, 
+            config.MCU_cut_height + config.MCU_lip, 
+            config.MCU_cut_width, 
+            config.MCU_PCB_thickness,
+            0,
+            x_center=x_center,
+            y_center=y_center + config.MCU_lip/2,
+            z_center=z_center
+            )
+        mcu_cutter = object_factories.box_factory(
+            self.component, 
+            self.name, 
+            config.MCU_cut_height, 
+            config.MCU_cut_width, 
+            config.MCU_cut_extrude,
+            0,
+            x_center=x_center,
+            y_center=y_center,
+            z_center=z_center
+            )
 
