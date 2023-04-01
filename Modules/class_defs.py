@@ -264,9 +264,36 @@ class Keyboard():
         self.component = functions.create_component(self.parent_comp, "keyboard")
         self.key_matrix = object_factories.matrix_factory(self.component, "matrix")
         self.thumbs = object_factories.thumbs_factory(self.component, "thumbs", 0, thumb_placement)
-        self.mcu_cutter = object_factories.mcu_cutter_factory(self.component, "mcu_cutter", tl_x=self.key_matrix.corners["tr"]["x"]/mm, tl_y=self.key_matrix.corners["tr"]["y"]/mm)
-
-
+        mcu_cutter_dims = dict(
+            cut_width = config.MCU_cut_width,
+            cut_height = config.MCU_cut_height,
+            cut_extrude = config.MCU_cut_extrude,
+            PCB_thickness = config.MCU_PCB_thickness,
+            lip = config.MCU_lip,
+            tl_margin = config.MCU_tl_margin,
+            USB_width = config.MCU_USB_width,
+            USB_height = config.MCU_USB_height,
+            USB_extrude = config.MCU_USB_extrude,
+            USB_zoffset = config.MCU_USB_zoffset
+        )
+        self.mcu_cutter = object_factories.elec_cutter_factory(self.component, "mcu_cutter", mcu_cutter_dims, 0, start_tl=[self.key_matrix.corners["tr"]["x"]/mm, self.key_matrix.corners["tr"]["y"]/mm, 0])
+        usb_cutter_dims = dict(
+            cut_width = config.USB_cut_width,
+            cut_height = config.USB_cut_height,
+            cut_extrude = config.USB_cut_extrude,
+            PCB_thickness = config.USB_PCB_thickness,
+            lip = config.USB_lip,
+            tl_margin = config.USB_tl_margin,
+            USB_width = config.USB_USB_width,
+            USB_height = config.USB_USB_height,
+            USB_extrude = config.USB_USB_extrude,
+            USB_zoffset = config.USB_USB_zoffset
+        )
+        self.usb_cutter = object_factories.elec_cutter_factory(self.component, "usb_cutter", usb_cutter_dims, 0) #, start_tl=[self.mcu_cutter.corners["br"]["x"]/mm, self.mcu_cutter.corners["br"]["y"]/mm, 0])
+        x=10
+        functions.rotate_component(self.usb_cutter.parent_comp, self.usb_cutter.component, -90, [0,0,1])
+        functions.move_component(self.usb_cutter.parent_comp, self.usb_cutter.component, [self.mcu_cutter.corners["br"]["x"], self.mcu_cutter.corners["br"]["y"], 0])
+        x = 10
 
 class Case():
     def __init__(self, matrix, parent_comp, sketch_plane="xy"):
@@ -375,40 +402,42 @@ class Thumbs():
                 self.corners["tr"] = new_key.corners["tr"]
 
 
-class MCU_cutter():
-    def __init__(self, parent_comp, name, tl_x=0, tl_y=0, tl_z=0):
+class Electronics_cutter():
+    '''Creates an object used to cut a hole for electronics.'''
+    def __init__(self, parent_comp, name, cutter_dims, rot, start_tl= [0, 0, 0]):
+        '''one of tl or tr must remain 0'''
         self.name = name
         self.parent_comp = parent_comp
         self.component = None
         self.corners = {}
-        self.tl_x = tl_x
-        self.tl_y = tl_y
-        self.tl_z = tl_z
-    
+        self.cutter_dims = cutter_dims
+        self.rot = rot
+        self.start_tl = start_tl
+
     def create(self):
         self.component = functions.create_component(self.parent_comp, self.name)
 
-        x_center = self.tl_x + config.MCU_cut_width/2 + config.MCU_space_to_tr_key
-        y_center = self.tl_y - config.MCU_cut_height/2
-        z_center = self.tl_z
-        self.mcu_pcb_cutter = object_factories.box_factory(
+        x_center = self.start_tl[0] + self.cutter_dims["cut_width"]/2 + self.cutter_dims["tl_margin"]
+        y_center = self.start_tl[1] - self.cutter_dims["cut_height"]/2
+        z_center = self.start_tl[2]
+        self.pcb_cutter = object_factories.box_factory(
             self.component, 
             self.name, 
-            config.MCU_cut_height + config.MCU_lip, 
-            config.MCU_cut_width, 
-            config.MCU_PCB_thickness,
-            0,
+            self.cutter_dims["cut_height"] + self.cutter_dims["lip"], 
+            self.cutter_dims["cut_width"], 
+            self.cutter_dims["PCB_thickness"],
+            rot=self.rot,
             x_center=x_center,
-            y_center=y_center + config.MCU_lip/2,
+            y_center=y_center + self.cutter_dims["lip"]/2,
             z_center=z_center
             )
-        self.mcu_cutter = object_factories.box_factory(
+        self.vertical_cutter = object_factories.box_factory(
             self.component, 
             self.name, 
-            config.MCU_cut_height, 
-            config.MCU_cut_width, 
-            config.MCU_cut_extrude,
-            0,
+            self.cutter_dims["cut_height"], 
+            self.cutter_dims["cut_width"], 
+            self.cutter_dims["cut_extrude"],
+            rot=self.rot,
             x_center=x_center,
             y_center=y_center,
             z_center=z_center
@@ -416,16 +445,16 @@ class MCU_cutter():
         self.usb_cutter = object_factories.box_factory(
             self.component,
             "usb_cutter",
-            config.MCU_USB_height,
-            config.MCU_USB_width,
-            config.MCU_USB_extrude,
-            0,
+            self.cutter_dims["USB_height"],
+            self.cutter_dims["USB_width"],
+            self.cutter_dims["USB_extrude"],
+            rot=self.rot,
             x_center=x_center,
-            y_center=y_center + config.MCU_cut_height/2,
-            z_center=z_center + config.MCU_USB_zoffset
+            y_center=y_center + self.cutter_dims["cut_height"]/2,
+            z_center=z_center + self.cutter_dims["USB_zoffset"]
         )
-        x = 10
         self.get_corners()
+        
 
     def get_corners(self):
-        self.corners = self.mcu_cutter.corners
+        self.corners = self.vertical_cutter.corners

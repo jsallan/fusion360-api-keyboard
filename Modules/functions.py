@@ -34,6 +34,24 @@ def place_matrix_keys(col):
 
     return key_locs, key_rots
 
+
+def rotate_component(parent_comp, component, rot_angle, rot_axis: list):
+    rotation_axis = adsk.core.Vector3D.create(rot_axis[0], rot_axis[1], rot_axis[2])
+    comp = parent_comp.occurrences.itemByName(f"{component.name}:1")
+    comp_transform = comp.transform
+    rotation_matrix = adsk.core.Matrix3D.create()
+    rotation_matrix.setToRotation(math.radians(rot_angle), rotation_axis, adsk.core.Point3D.create(1,2,3))
+    comp_transform.transformBy(rotation_matrix)
+    comp.transform = comp_transform
+
+def move_component(parent_comp, component, translate: list):
+    comp = parent_comp.occurrences.itemByName(f"{component.name}:1")
+    new_position = adsk.core.Vector3D.create(translate[0], translate[1], translate[2])  
+    comp_transform = comp.transform
+    comp_transform.translation = new_position
+    comp.transform = comp_transform
+
+
 def create_component(parent_comp, name):
     component = parent_comp.occurrences.addNewComponent(adsk.core.Matrix3D.create()).component
     component.name = name

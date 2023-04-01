@@ -39,8 +39,20 @@ MCU_cut_height = 33.8
 MCU_cut_extrude = -15
 MCU_PCB_thickness = 1.6
 MCU_lip = 1.5
+MCU_tl_margin = 5
 MCU_USB_width = 9
 MCU_USB_height = 15
 MCU_USB_extrude = -3.95
 MCU_USB_zoffset = 0.8
-MCU_space_to_tr_key = 5
+
+# USB breakout cutter
+USB_cut_width = 12.2
+USB_cut_height = 14.1
+USB_cut_extrude = -15
+USB_PCB_thickness = 1.2
+USB_lip = 1
+USB_tl_margin = 5
+USB_USB_width = 10
+USB_USB_height = 15
+USB_USB_extrude = -4
+USB_USB_zoffset = 0.5
