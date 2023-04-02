@@ -291,8 +291,8 @@ class Keyboard():
         )
         self.usb_cutter = object_factories.elec_cutter_factory(self.component, "usb_cutter", usb_cutter_dims, 0) #, start_tl=[self.mcu_cutter.corners["br"]["x"]/mm, self.mcu_cutter.corners["br"]["y"]/mm, 0])
         x=10
-        functions.rotate_component(self.usb_cutter.parent_comp, self.usb_cutter.component, -90, [0,0,1])
-        functions.move_component(self.usb_cutter.parent_comp, self.usb_cutter.component, [self.mcu_cutter.corners["br"]["x"], self.mcu_cutter.corners["br"]["y"], 0])
+        functions.rotate_component(self.usb_cutter.parent_comp, self.usb_cutter, -90, [0,0,1])
+        functions.move_component(self.usb_cutter.parent_comp, self.usb_cutter, [self.mcu_cutter.corners["br"]["x"], self.mcu_cutter.corners["br"]["y"], 0])
         x = 10
 
 class Case():

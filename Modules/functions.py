@@ -35,21 +35,70 @@ def place_matrix_keys(col):
     return key_locs, key_rots
 
 
-def rotate_component(parent_comp, component, rot_angle, rot_axis: list):
+def rotate_component(parent_comp, thing, rot_angle, rot_axis: list):
     rotation_axis = adsk.core.Vector3D.create(rot_axis[0], rot_axis[1], rot_axis[2])
-    comp = parent_comp.occurrences.itemByName(f"{component.name}:1")
+    comp = parent_comp.occurrences.itemByName(f"{thing.component.name}:1")
     comp_transform = comp.transform
     rotation_matrix = adsk.core.Matrix3D.create()
     rotation_matrix.setToRotation(math.radians(rot_angle), rotation_axis, adsk.core.Point3D.create(1,2,3))
     comp_transform.transformBy(rotation_matrix)
     comp.transform = comp_transform
+    update_corners(thing, rotate=[rot_axis[i]*rot_angle for i in range(len(rot_axis))])
 
-def move_component(parent_comp, component, translate: list):
-    comp = parent_comp.occurrences.itemByName(f"{component.name}:1")
+def move_component(parent_comp, thing, translate: list):
+    comp = parent_comp.occurrences.itemByName(f"{thing.name}:1")
     new_position = adsk.core.Vector3D.create(translate[0], translate[1], translate[2])  
     comp_transform = comp.transform
     comp_transform.translation = new_position
     comp.transform = comp_transform
+    update_corners(thing, translate=translate)
+
+def update_corners(thing, translate: list=[0,0,0], rotate: list=[0,0,0]):
+    '''Updates the corners attribute of thing object given a translation and rotation.'''
+    update_functions = [rotate_point, translate_point]
+    corner_rot_trans = [rotate, translate]
+    for index1, update_function in enumerate(update_functions):
+        for corner, point in thing.corners.items():
+            new_point = update_function(list(point.values()), corner_rot_trans[index1])
+            for index2, axis in enumerate(point):
+                point[axis] = new_point[index2]
+            thing.corners[corner] = point
+
+
+def translate_point(point:list, translate:list) -> list:
+    return [point[i]+translate[i] for i in range(len(point))]
+
+
+def rotate_point(point:list, rotation:list) -> list:
+    """
+    Rotates a point `[x, y, z]` around the x-axis, y-axis, and z-axis by the angles `a`, `b`, and `c` respectively.
+    """
+    # Convert angles to radians
+    alpha, beta, gamma = [math.radians(rotation[i]) for i in range(3)]
+    
+    # Calculate the rotation matrix for rotation around x-axis
+    Rx = [[1, 0, 0],
+          [0, math.cos(alpha), -math.sin(alpha)],
+          [0, math.sin(alpha), math.cos(alpha)]]
+    
+    # Calculate the rotation matrix for rotation around y-axis
+    Ry = [[math.cos(beta), 0, math.sin(beta)],
+          [0, 1, 0],
+          [-math.sin(beta), 0, math.cos(beta)]]
+    
+    # Calculate the rotation matrix for rotation around z-axis
+    Rz = [[math.cos(gamma), -math.sin(gamma), 0],
+          [math.sin(gamma), math.cos(gamma), 0],
+          [0, 0, 1]]
+    
+    rotated_point = point.copy()
+    
+    # Apply rotations sequentially
+    rotated_point = [sum([Rx[i][j]*rotated_point[j] for j in range(3)]) for i in range(3)]  # Rotate around x-axis
+    rotated_point = [sum([Ry[i][j]*rotated_point[j] for j in range(3)]) for i in range(3)]  # Rotate around y-axis
+    rotated_point = [sum([Rz[i][j]*rotated_point[j] for j in range(3)]) for i in range(3)]  # Rotate around z-axis
+
+    return rotated_point
 
 
 def create_component(parent_comp, name):
