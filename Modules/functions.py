@@ -187,3 +187,61 @@ def get_coords_from_line(line):
         "y":line.endSketchPoint.geometry.y,
         "z":line.endSketchPoint.geometry.z
         }
+
+def line_intersection(point1_1, point1_2, point2_1, point2_2):
+    """
+    Calculates the intersection point of two lines given two points on each line.
+    Args:
+        point1_1 (tuple): (x, y) coordinates of the first point on the first line.
+        point1_2 (tuple): (x, y) coordinates of the second point on the first line.
+        point2_1 (tuple): (x, y) coordinates of the first point on the second line.
+        point2_2 (tuple): (x, y) coordinates of the second point on the second line.
+    Returns:
+        tuple: (x, y) coordinates of the intersection point of the two lines.
+        None: If the two lines are parallel.
+    """
+    # Check if lines are vertical
+    if point1_1[0] == point1_2[0]:  # First line is vertical
+        x_intersect = point1_1[0]
+        slope2 = (point2_2[1] - point2_1[1]) / (point2_2[0] - point2_1[0])
+        b2 = point2_1[1] - slope2 * point2_1[0]
+        y_intersect = slope2 * x_intersect + b2
+        return (x_intersect, y_intersect)
+        
+    elif point2_1[0] == point2_2[0]:  # Second line is vertical
+        x_intersect = point2_1[0]
+        slope1 = (point1_2[1] - point1_1[1]) / (point1_2[0] - point1_1[0])
+        b1 = point1_1[1] - slope1 * point1_1[0]
+        y_intersect = slope1 * x_intersect + b1
+        return (x_intersect, y_intersect)
+
+    else:  # Neither line is vertical
+        # Calculate the slope of each line
+        slope1 = (point1_2[1] - point1_1[1]) / (point1_2[0] - point1_1[0])
+        slope2 = (point2_2[1] - point2_1[1]) / (point2_2[0] - point2_1[0])
+
+        # Calculate the y-intercept of each line
+        b1 = point1_1[1] - slope1 * point1_1[0]
+        b2 = point2_1[1] - slope2 * point2_1[0]
+
+        # If lines are parallel, there is no intersection
+        if slope1 == slope2:
+            return None
+
+        # Find intersection
+        x_intersect = (b2 - b1) / (slope1 - slope2)
+        y_intersect = slope1 * x_intersect + b1
+
+        return (x_intersect, y_intersect)
+    
+def is_line_between_points(intersection_point, from_point1, to_point2):
+    '''
+    Determines if line passes between point1 and point2.
+    Returns True if the line passes through or on the points, False if it doesn't.
+    '''
+    (x_intersect, y_intersect) = intersection_point[0], intersection_point[1]
+    if (min(from_point1[0], to_point2[0]) <= x_intersect <= max(from_point1[0], to_point2[0])) and \
+    (min(from_point1[1], to_point2[1]) <= y_intersect <= max(from_point1[1], to_point2[1])):
+        return True
+    else:
+        return False
