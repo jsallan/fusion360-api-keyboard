@@ -13,6 +13,22 @@ mm = 0.1
 #         self.component = self.parent_comp.occurrences.addNewComponent(adsk.core.Matrix3D.create()).component
 #         self.component.name = self.name
 
+class Point(list):
+    """
+    Represents a 3D point with x, y, and z coordinates.
+
+    Provides dot notation access to each coordinate via the `x`, `y`, and `z`
+    attributes.
+    """
+
+    def __init__(self, x, y, z):
+        super(Point, self).__init__([x, y, z])
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def __str__(self):
+        return f"x: {self.x}, y: {self.y}, z: {self.z}"
 
 class Box:
     def __init__(self, parent_comp, height, width, depth, name, sketch_plane="xy", x_center=0.0, y_center=0.0, z_center=0.0, rotation=0):
