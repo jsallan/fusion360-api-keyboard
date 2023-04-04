@@ -296,8 +296,12 @@ class Keyboard():
         x = 10
 
 class Case():
-    def __init__(self, matrix, parent_comp, sketch_plane="xy"):
-        self.matrix = matrix
+    def __init__(self, keyboard:Keyboard, parent_comp, sketch_plane="xy"):
+        self.keyboard = keyboard
+        self.matrix = keyboard.key_matrix
+        self.thumbs = keyboard.thumbs
+        self.mcu = keyboard.mcu_cutter
+        self.usb = keyboard.usb_cutter
         self.parent_comp = parent_comp
         self.sketch_plane = self.get_sketch_plane(sketch_plane)
         self.case_points = []
