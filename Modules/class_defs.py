@@ -313,7 +313,12 @@ class Case():
         for col in self.matrix.cols:
             self.case_points.append(col.corners["tl"])
             self.case_points.append(col.corners["tr"])
+
+        self.case_points.append(self.mcu.corners["tl"])
+        self.case_points.append(self.mcu.corners["tr"])
         
+        thumb_intersection = self.find_thumb_intersection_point()
+
         for col in reversed(self.matrix.cols):
             self.case_points.append(col.corners["br"])
             self.case_points.append(col.corners["bl"])
@@ -372,6 +377,10 @@ class Case():
             line2 = self.offset_curves.item(0)
             if functions.angle_between_lines(line1, line2) > 0:
                 self.sketch.sketchCurves.sketchArcs.addFillet(line1, line1.endSketchPoint.geometry, line2, line2.startSketchPoint.geometry, config.fillet*mm)
+
+    def find_thumb_intersection_point(self):
+        for key in self.thumbs.keys:
+            pass
 
 class Thumbs():
     def __init__(self, parent_comp, name, col, placement_function):
