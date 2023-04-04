@@ -59,9 +59,9 @@ def update_corners(thing, translate: list=[0,0,0], rotate: list=[0,0,0]):
     corner_rot_trans = [rotate, translate]
     for index1, update_function in enumerate(update_functions):
         for corner, point in thing.corners.items():
-            new_point = update_function(list(point.values()), corner_rot_trans[index1])
-            for index2, axis in enumerate(point):
-                point[axis] = new_point[index2]
+            new_point = update_function(point, corner_rot_trans[index1])
+            for index2 in range(len(point)):
+                point[index2] = new_point[index2]
             thing.corners[corner] = point
 
 

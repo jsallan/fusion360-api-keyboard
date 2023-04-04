@@ -38,9 +38,10 @@ class Box:
         self.width = width * mm
         self.depth = depth * mm
         self.name = name
-        self.x_center = x_center * mm
-        self.y_center = y_center * mm
-        self.z_center = z_center * mm
+        self.center = Point(x_center * mm, y_center * mm, z_center * mm)
+        # self.x_center = x_center * mm
+        # self.y_center = y_center * mm
+        # self.z_center = z_center * mm
         self.rotation = rotation
         self.corners = self.create_corners()
         self.sketch = None
@@ -51,46 +52,26 @@ class Box:
         # (x, y, z)
         hypoteneus = math.sqrt(math.pow((self.width/2), 2) + math.pow((self.height/2), 2))
         theta = math.degrees(math.atan((self.height/2)/(self.width/2)))
-        # self.tl = {
-        #     "x" : (-(self.width/2)) * math.cos(math.radians(45+self.rotation)) + self.x_center, 
-        #     "y" : ((self.height/2)) * math.sin(math.radians(45+self.rotation)) + self.y_center, 
-        #     "z" : self.z_center
-        #     }
-        # self.tr = {
-        #     "x" : ((self.width/2)) * math.cos(math.radians(45+self.rotation)) + self.x_center, 
-        #     "y" : ((self.height/2)) * math.sin(math.radians(45+self.rotation)) + self.y_center, 
-        #     "z" : self.z_center
-        #     }
-        # self.bl = {
-        #     "x" : (-(self.width/2)) * math.cos(math.radians(45+self.rotation)) + self.x_center, 
-        #     "y" : (-(self.height/2)) * math.sin(math.radians(45+self.rotation)) + self.y_center, 
-        #     "z" : self.z_center
-        #     }
-        # self.br = {
-        #     "x" : ((self.width/2)) * math.cos(math.radians(45+self.rotation)) + self.x_center, 
-        #     "y" : (-(self.height/2)) * math.sin(math.radians(45+self.rotation)) + self.y_center, 
-        #     "z" : self.z_center
-        #     }
-        self.tl = {
-            "x" : (hypoteneus) * math.cos(math.radians(180-theta+self.rotation)) + self.x_center, 
-            "y" : (hypoteneus) * math.sin(math.radians(180-theta+self.rotation)) + self.y_center, 
-            "z" : self.z_center
-            }
-        self.tr = {
-            "x" : (hypoteneus) * math.cos(math.radians(theta+self.rotation)) + self.x_center, 
-            "y" : (hypoteneus) * math.sin(math.radians(theta+self.rotation)) + self.y_center, 
-            "z" : self.z_center
-            }
-        self.bl = {
-            "x" : (hypoteneus) * math.cos(math.radians(180+theta+self.rotation)) + self.x_center, 
-            "y" : (hypoteneus) * math.sin(math.radians(180+theta+self.rotation)) + self.y_center, 
-            "z" : self.z_center
-            }
-        self.br = {
-            "x" : (hypoteneus) * math.cos(math.radians(360-theta+self.rotation)) + self.x_center, 
-            "y" : (hypoteneus) * math.sin(math.radians(360-theta+self.rotation)) + self.y_center, 
-            "z" : self.z_center
-            }
+        self.tl = Point(
+            (hypoteneus) * math.cos(math.radians(180-theta+self.rotation)) + self.center.x, 
+            (hypoteneus) * math.sin(math.radians(180-theta+self.rotation)) + self.center.y, 
+            self.center.z
+        )
+        self.tr = Point(
+            (hypoteneus) * math.cos(math.radians(theta+self.rotation)) + self.center.x, 
+            (hypoteneus) * math.sin(math.radians(theta+self.rotation)) + self.center.y, 
+            self.center.z
+        )
+        self.bl = Point(
+            (hypoteneus) * math.cos(math.radians(180+theta+self.rotation)) + self.center.x,
+            (hypoteneus) * math.sin(math.radians(180+theta+self.rotation)) + self.center.y, 
+            self.center.z
+        )
+        self.br = Point(
+            (hypoteneus) * math.cos(math.radians(360-theta+self.rotation)) + self.center.x, 
+            (hypoteneus) * math.sin(math.radians(360-theta+self.rotation)) + self.center.y, 
+            self.center.z
+        )
         return {"tl" : self.tl, "tr" : self.tr, "bl" : self.bl, "br" : self.br}
 
     def get_sketch_plane(self, sketch_plane):
@@ -108,10 +89,10 @@ class Box:
     def create_sketch(self):
         self.sketch = self.parent_comp.sketches.add( self.sketch_plane )
         
-        bl = adsk.core.Point3D.create( **self.bl )
-        br = adsk.core.Point3D.create( **self.br )
-        tr = adsk.core.Point3D.create( **self.tr )
-        tl = adsk.core.Point3D.create( **self.tl )
+        bl = adsk.core.Point3D.create( *self.bl )
+        br = adsk.core.Point3D.create( *self.br )
+        tr = adsk.core.Point3D.create( *self.tr )
+        tl = adsk.core.Point3D.create( *self.tl )
 
         #-- Create Edges
         la = self.sketch.sketchCurves.sketchLines.addByTwoPoints( bl, br )
@@ -292,7 +273,7 @@ class Keyboard():
             USB_extrude = config.MCU_USB_extrude,
             USB_zoffset = config.MCU_USB_zoffset
         )
-        self.mcu_cutter = object_factories.elec_cutter_factory(self.component, "mcu_cutter", mcu_cutter_dims, 0, start_tl=[self.key_matrix.corners["tr"]["x"]/mm, self.key_matrix.corners["tr"]["y"]/mm, 0])
+        self.mcu_cutter = object_factories.elec_cutter_factory(self.component, "mcu_cutter", mcu_cutter_dims, 0, start_tl=[self.key_matrix.corners["tr"].x/mm, self.key_matrix.corners["tr"].y/mm, 0])
         usb_cutter_dims = dict(
             cut_width = config.USB_cut_width,
             cut_height = config.USB_cut_height,
@@ -308,7 +289,7 @@ class Keyboard():
         self.usb_cutter = object_factories.elec_cutter_factory(self.component, "usb_cutter", usb_cutter_dims, 0) #, start_tl=[self.mcu_cutter.corners["br"]["x"]/mm, self.mcu_cutter.corners["br"]["y"]/mm, 0])
         x=10
         functions.rotate_component(self.usb_cutter.parent_comp, self.usb_cutter, -90, [0,0,1])
-        functions.move_component(self.usb_cutter.parent_comp, self.usb_cutter, [self.mcu_cutter.corners["br"]["x"], self.mcu_cutter.corners["br"]["y"], 0])
+        functions.move_component(self.usb_cutter.parent_comp, self.usb_cutter, [self.mcu_cutter.corners["br"].x, self.mcu_cutter.corners["br"].y, 0])
         x = 10
 
 class Case():
